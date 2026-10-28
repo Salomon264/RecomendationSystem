@@ -1,0 +1,166 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="RecomendationApp.App"
+             RequestedThemeVariant="Light">
+
+  <Application.Resources>
+    <SolidColorBrush x:Key="AppBg" Color="#EEF2F8" />
+    <SolidColorBrush x:Key="CardBg" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="CardLine" Color="#E3E8F0" />
+    <SolidColorBrush x:Key="Ink" Color="#182135" />
+    <SolidColorBrush x:Key="Muted" Color="#6A7689" />
+    <SolidColorBrush x:Key="Accent" Color="#3A6DF5" />
+    <SolidColorBrush x:Key="AccentDark" Color="#2B57D0" />
+    <SolidColorBrush x:Key="AccentSoft" Color="#E7EEFE" />
+    <SolidColorBrush x:Key="Good" Color="#1E9E6A" />
+    <SolidColorBrush x:Key="Warn" Color="#C77700" />
+  </Application.Resources>
+
+  <Application.Styles>
+    <FluentTheme />
+
+    <!-- базовый текст -->
+    <Style Selector="TextBlock">
+      <Setter Property="Foreground" Value="{StaticResource Ink}" />
+    </Style>
+    <Style Selector="TextBlock.muted">
+        <Setter Property="Foreground" Value="{StaticResource Muted}" />
+    </Style>
+    <Style Selector="TextBlock.small">
+      <Setter Property="FontSize" Value="12" />
+    </Style>
+    <Style Selector="TextBlock.tiny">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Foreground" Value="{StaticResource Muted}" />
+    </Style>
+    <Style Selector="TextBlock.h1">
+      <Setter Property="FontSize" Value="19" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBlock.h2">
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBlock.badge">
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="{StaticResource Accent}" />
+    </Style>
+    <Style Selector="TextBlock.caption">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="{StaticResource Muted}" />
+    </Style>
+
+    <!-- карточка-контейнер -->
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="{StaticResource CardBg}" />
+      <Setter Property="BorderBrush" Value="{StaticResource CardLine}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="16" />
+      <Setter Property="Padding" Value="16" />
+      <Setter Property="BoxShadow" Value="0 6 20 0 #12000000" />
+    </Style>
+
+    <!-- «обложка» книги -->
+    <Style Selector="Border.cover">
+      <Setter Property="Width" Value="46" />
+      <Setter Property="Height" Value="62" />
+      <Setter Property="CornerRadius" Value="8" />
+    </Style>
+    <Style Selector="Border.cover TextBlock">
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- кнопки -->
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="{StaticResource Accent}" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="18,9" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource AccentDark}" />
+    </Style>
+
+    <Style Selector="Button.ghost">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="{StaticResource CardLine}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="14,8" />
+    </Style>
+    <Style Selector="Button.ghost:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource AccentSoft}" />
+    </Style>
+
+    <!-- чипы выбора оценки -->
+    <Style Selector="ToggleButton.chip">
+      <Setter Property="Width" Value="36" />
+      <Setter Property="Height" Value="36" />
+      <Setter Property="Margin" Value="0,0,6,6" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Background" Value="{StaticResource CardBg}" />
+      <Setter Property="BorderBrush" Value="{StaticResource CardLine}" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="ToggleButton.chip:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource AccentSoft}" />
+    </Style>
+    <Style Selector="ToggleButton.chip:checked">
+      <Setter Property="Background" Value="{StaticResource Accent}" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="BorderBrush" Value="{StaticResource Accent}" />
+    </Style>
+
+    <!-- поля ввода -->
+    <Style Selector="TextBox">
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="10,8" />
+    </Style>
+    <Style Selector="ComboBox">
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+    </Style>
+
+    <!-- боковая навигация -->
+    <Style Selector="ListBox.nav ListBoxItem">
+      <Setter Property="Padding" Value="12,9" />
+      <Setter Property="Margin" Value="0,0,0,4" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="ListBox.nav ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource Accent}" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style Selector="ListBox.nav ListBoxItem:selected TextBlock">
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+
+    <!-- список книг: карточки без лишней обёртки -->
+    <Style Selector="ListBox.books ListBoxItem">
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Margin" Value="0,0,0,10" />
+      <Setter Property="CornerRadius" Value="14" />
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="ListBox.books ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource AccentSoft}" />
+    </Style>
+
+    <!-- список «Мои оценки» и справки -->
+    <Style Selector="ListBox.plain ListBoxItem">
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Margin" Value="0,0,0,10" />
+      <Setter Property="CornerRadius" Value="14" />
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+  </Application.Styles>
+</Application>

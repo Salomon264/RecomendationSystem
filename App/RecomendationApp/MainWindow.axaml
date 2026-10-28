@@ -1,0 +1,327 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:models="clr-namespace:RecomendationApp.Models;assembly=RecomendationApp"
+        xmlns:services="clr-namespace:RecomendationApp.Services;assembly=RecomendationApp"
+        mc:Ignorable="d" d:DesignWidth="1120" d:DesignHeight="720"
+        x:Class="RecomendationApp.MainWindow"
+        Title="Рекомендательная система книг"
+        Width="1120" Height="720" MinWidth="980" MinHeight="600"
+        Background="{StaticResource AppBg}">
+
+  <Grid RowDefinitions="Auto,*,Auto">
+
+    <!-- ================= ШАПКА ================= -->
+    <Border Grid.Row="0" Background="{StaticResource CardBg}" BorderBrush="{StaticResource CardLine}"
+            BorderThickness="0,0,0,1" Padding="20,14">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Orientation="Horizontal" Spacing="12">
+          <Border Width="38" Height="38" CornerRadius="12" Background="{StaticResource Accent}">
+            <TextBlock Text="РС" Foreground="White" FontWeight="Bold" FontSize="14"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+          <StackPanel VerticalAlignment="Center" Spacing="1">
+            <TextBlock Classes="h1" Text="Рекомендательная система книг" />
+            <TextBlock Classes="tiny" Text="5 режимов API · оценки сохраняются в локальную базу" />
+          </StackPanel>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <Ellipse x:Name="StatusDot" Width="9" Height="9" Fill="{StaticResource Muted}" VerticalAlignment="Center" />
+          <TextBlock x:Name="TxtConn" Classes="muted small" VerticalAlignment="Center" Text="Соединение не проверено" />
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- ================= ОСНОВНАЯ ЧАСТЬ ================= -->
+    <Grid Grid.Row="1" ColumnDefinitions="216,*,320" Margin="20,16">
+
+      <!-- левая колонка: навигация и настройки -->
+      <StackPanel Grid.Column="0" Spacing="12">
+        <ListBox x:Name="Nav" Classes="nav" SelectedIndex="0" Background="Transparent"
+                 SelectionChanged="Nav_SelectionChanged">
+          <ListBoxItem>
+            <StackPanel Spacing="1">
+              <TextBlock Text="Рекомендации" FontWeight="SemiBold" />
+              <TextBlock Classes="tiny" Text="5 режимов API" />
+            </StackPanel>
+          </ListBoxItem>
+          <ListBoxItem>
+            <StackPanel Spacing="1">
+              <TextBlock Text="Сравнение режимов" FontWeight="SemiBold" />
+              <TextBlock Classes="tiny" Text="все 5 запроса сразу" />
+            </StackPanel>
+          </ListBoxItem>
+          <ListBoxItem>
+            <StackPanel Spacing="1">
+              <TextBlock Text="Мои оценки" FontWeight="SemiBold" />
+              <TextBlock Classes="tiny" Text="история из базы" />
+            </StackPanel>
+          </ListBoxItem>
+          <ListBoxItem>
+            <StackPanel Spacing="1">
+              <TextBlock Text="Справка" FontWeight="SemiBold" />
+              <TextBlock Classes="tiny" Text="команды и параметры" />
+            </StackPanel>
+          </ListBoxItem>
+        </ListBox>
+
+        <Border Classes="card" Padding="14">
+          <StackPanel Spacing="8">
+            <TextBlock Classes="caption" Text="АДРЕС API" />
+            <TextBox x:Name="TxtBase" Text="http://127.0.0.1:8000" />
+            <Button x:Name="BtnCheck" Classes="ghost" Content="Проверить соединение" Click="BtnCheck_Click" />
+          </StackPanel>
+        </Border>
+
+        <Border Classes="card" Padding="14">
+          <StackPanel Spacing="8">
+            <TextBlock Classes="caption" Text="МОЙ USER-ID" />
+            <TextBox x:Name="TxtMyId" Text="1" />
+            <TextBlock Classes="tiny" TextWrapping="Wrap"
+                       Text="Нужен для персональных рекомендаций и для сохранения оценок." />
+          </StackPanel>
+        </Border>
+      </StackPanel>
+
+      <!-- центральная колонка: страницы -->
+      <Panel Grid.Column="1" Margin="16,0">
+
+        <!-- страница 1: рекомендации -->
+        <Grid x:Name="PageRecommend" RowDefinitions="Auto,*">
+          <Border Classes="card">
+            <StackPanel Spacing="10">
+              <TextBlock Classes="caption" Text="ЧТО ПОКАЗАТЬ" />
+              <ComboBox x:Name="CmbMode" HorizontalAlignment="Stretch" SelectionChanged="CmbMode_SelectionChanged">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate DataType="models:ModeItem">
+                    <TextBlock Text="{Binding Name}" />
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+              <TextBlock x:Name="TxtModeDesc" Classes="muted small" TextWrapping="Wrap" />
+              <Grid ColumnDefinitions="*,Auto,Auto">
+                <TextBox x:Name="TxtParam" />
+                <Button Grid.Column="1" x:Name="BtnExample" Classes="ghost" Content="Пример"
+                        Margin="10,0,0,0" Click="BtnExample_Click" />
+                <Button Grid.Column="2" x:Name="BtnLoad" Classes="primary" Content="Показать"
+                        Margin="10,0,0,0" Click="BtnLoad_Click" IsDefault="True" />
+              </Grid>
+              <TextBlock x:Name="TxtParamHint" Classes="tiny" TextWrapping="Wrap" />
+              <ProgressBar x:Name="Prog" Height="4" IsIndeterminate="True" IsVisible="False" />
+            </StackPanel>
+          </Border>
+
+          <Grid Grid.Row="1" Margin="0,14,0,0" RowDefinitions="Auto,*">
+            <Grid ColumnDefinitions="*,Auto" Margin="2,0,2,8">
+              <StackPanel Spacing="1">
+                <TextBlock Classes="h2" Text="Результаты" />
+                <TextBlock x:Name="TxtScoreHint" Classes="tiny" />
+              </StackPanel>
+              <TextBlock Grid.Column="1" x:Name="TxtCount" Classes="tiny" VerticalAlignment="Center" />
+            </Grid>
+            <Panel Grid.Row="1">
+              <ListBox x:Name="LstResults" Classes="books" Background="Transparent"
+                       SelectionChanged="LstResults_SelectionChanged">
+                <ListBox.ItemTemplate>
+                  <DataTemplate DataType="models:Book">
+                    <Border Padding="12,10">
+                      <Grid ColumnDefinitions="22,Auto,*,Auto">
+                        <TextBlock Text="{Binding RankText}" Classes="muted small" FontWeight="SemiBold"
+                                   VerticalAlignment="Top" />
+                        <Border Grid.Column="1" Classes="cover" Background="{Binding Cover}" Margin="0,0,12,0">
+                          <TextBlock Text="{Binding Initials}" />
+                        </Border>
+                        <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="3">
+                          <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                          <TextBlock Text="{Binding Author}" Classes="muted small" />
+                          <ProgressBar Value="{Binding Percent, Mode=OneWay}" Minimum="0" Maximum="100"
+                                       Height="4" CornerRadius="2" Foreground="{StaticResource Accent}"
+                                       Background="{StaticResource CardLine}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="3" VerticalAlignment="Center" Margin="12,0,0,0" Spacing="1">
+                          <TextBlock Text="{Binding Badge}" Classes="badge" HorizontalAlignment="Right" />
+                          <TextBlock Text="{Binding BadgeHint}" Classes="tiny" HorizontalAlignment="Right" />
+                          <TextBlock Text="{Binding ScoreText, StringFormat='raw {0}'}"
+                                     FontSize="10" Foreground="{StaticResource Muted}" HorizontalAlignment="Right" />
+                        </StackPanel>
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+
+              <StackPanel x:Name="EmptyState" HorizontalAlignment="Center" VerticalAlignment="Center"
+                          Spacing="4" IsVisible="False">
+                <TextBlock Text="Список пуст" Classes="muted" HorizontalAlignment="Center" />
+                <TextBlock Classes="tiny" HorizontalAlignment="Center"
+                           Text="Выберите режим, при необходимости укажите параметр и нажмите «Показать»" />
+              </StackPanel>
+            </Panel>
+          </Grid>
+        </Grid>
+
+        <!-- страница 2: сравнение режимов -->
+        <Grid x:Name="PageCompare" RowDefinitions="Auto,*" IsVisible="False">
+          <Border Classes="card">
+            <StackPanel Spacing="8">
+              <TextBlock Classes="h2" Text="Все алгоритмы на одном входе" />
+              <TextBlock Classes="muted small" TextWrapping="Wrap"
+                         Text="Один и тот же User-ID запрашивается во всех режимах API. Разные списки и разное время ответа показывают, что считается сходство, а не отдаётся один и тот же топ." />
+              <Grid ColumnDefinitions="Auto,*,Auto,*">
+                <TextBlock Text="User-ID:" Classes="muted small" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <TextBox Grid.Column="1" x:Name="TxtCompareUser" Text="11676" Watermark="например 11676" />
+                <TextBlock Grid.Column="2" Text="Книга:" Classes="muted small" VerticalAlignment="Center" Margin="14,0,8,0" />
+                <TextBox Grid.Column="3" x:Name="TxtCompareTitle" Text="The Hobbit" Watermark="точное название" />
+              </Grid>
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock x:Name="TxtCompareSummary" Classes="tiny" TextWrapping="Wrap" VerticalAlignment="Center" />
+                <Button x:Name="BtnCompare" Grid.Column="1" Classes="primary" Content="Сравнить все режимы"
+                        Click="BtnCompare_Click" />
+              </Grid>
+              <ProgressBar x:Name="ProgCompare" Height="4" IsIndeterminate="True" IsVisible="False" />
+            </StackPanel>
+          </Border>
+
+          <ListBox Grid.Row="1" x:Name="LstCompare" Classes="plain" Background="Transparent" Margin="0,14,0,0">
+            <ListBox.ItemTemplate>
+              <DataTemplate DataType="models:CompareRow">
+                <Border Classes="card" Padding="14">
+                  <StackPanel Spacing="6">
+                    <TextBlock Text="{Binding Head}" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Books}" FontSize="12" TextWrapping="Wrap"
+                               Foreground="{StaticResource Ink}" LineHeight="19" />
+                    <TextBlock Text="{Binding Overlaps}" Classes="tiny" TextWrapping="Wrap" />
+                    <Border CornerRadius="8" Background="#FDF0E1" Padding="8,4" IsVisible="{Binding IsCopyOfPopular}">
+                      <TextBlock Text="{Binding Warning}" Foreground="{StaticResource Warn}" FontSize="12" />
+                    </Border>
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </Grid>
+
+        <!-- страница 3: мои оценки -->
+        <Grid x:Name="PageSaved" RowDefinitions="Auto,*" IsVisible="False">
+          <Border Classes="card">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+              <TextBlock Text="User-ID:" Classes="muted small" VerticalAlignment="Center" Margin="0,0,10,0" />
+              <TextBox Grid.Column="1" x:Name="TxtFilterId" Watermark="пусто — показать все оценки" />
+              <Button Grid.Column="2" Classes="primary" Content="Обновить" Margin="10,0,0,0"
+                      Click="BtnRefresh_Click" />
+            </Grid>
+          </Border>
+
+          <Panel Grid.Row="1" Margin="0,14,0,0">
+            <ListBox x:Name="LstSaved" Classes="plain" Background="Transparent">
+              <ListBox.ItemTemplate>
+                <DataTemplate DataType="models:RatingRow">
+                  <Border Classes="card" Padding="12,10">
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                      <Border Width="42" Height="42" CornerRadius="10" Background="{StaticResource AccentSoft}">
+                        <TextBlock Text="{Binding RatingText}" Foreground="{StaticResource Accent}"
+                                   FontWeight="Bold" FontSize="13"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                      </Border>
+                      <StackPanel Grid.Column="1" Margin="12,0" VerticalAlignment="Center" Spacing="2">
+                        <TextBlock Text="{Binding BookTitle}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding DateText}" Classes="tiny" />
+                      </StackPanel>
+                      <TextBlock Grid.Column="2" Classes="muted small" VerticalAlignment="Center"
+                                 Text="{Binding UserId, StringFormat='user {0}'}" />
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+
+            <StackPanel x:Name="SavedEmpty" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="False">
+              <TextBlock Text="Оценок в базе пока нет" Classes="muted" HorizontalAlignment="Center" />
+            </StackPanel>
+          </Panel>
+        </Grid>
+
+        <!-- страница 3: справка -->
+        <Grid x:Name="PageHelp" RowDefinitions="Auto,*" IsVisible="False">
+          <Border Classes="card">
+            <StackPanel Spacing="6">
+              <TextBlock Classes="h2" Text="Команды API" />
+              <TextBlock Classes="muted small" TextWrapping="Wrap"
+                         Text="Справка читается из OpenAPI-описания работающего сервера. Сервер запускается в папке book-recommender-api командой: python3 -m uvicorn main:app --port 8000" />
+            </StackPanel>
+          </Border>
+
+          <ScrollViewer Grid.Row="1" Margin="0,14,0,0">
+            <ItemsControl x:Name="HelpList">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <StackPanel Spacing="10" />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="services:ApiHelpItem">
+                  <Border Classes="card" Padding="14">
+                    <StackPanel Spacing="6">
+                      <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Border CornerRadius="7" Background="{StaticResource AccentSoft}" Padding="7,3">
+                          <TextBlock Text="{Binding Method}" Foreground="{StaticResource Accent}"
+                                     FontSize="11" FontWeight="Bold" />
+                        </Border>
+                        <TextBlock Text="{Binding Path}" FontFamily="monospace" FontSize="12"
+                                   VerticalAlignment="Center" />
+                      </StackPanel>
+                      <TextBlock Text="{Binding Summary}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                      <TextBlock Text="{Binding ParamsText}" Classes="tiny" TextWrapping="Wrap" />
+                    </StackPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </Grid>
+      </Panel>
+
+      <!-- правая колонка: выбранная книга -->
+      <Border Grid.Column="2" Classes="card" x:Name="DetailPanel">
+        <StackPanel Spacing="14">
+          <TextBlock Classes="caption" Text="ВЫБРАННАЯ КНИГА" />
+
+          <TextBlock x:Name="DetailEmpty" Classes="muted small" TextWrapping="Wrap"
+                     Text="Нажмите на книгу в списке — здесь появятся её данные и кнопки оценки." />
+
+          <StackPanel x:Name="DetailBody" Spacing="14" IsVisible="False">
+            <Grid ColumnDefinitions="64,*">
+              <Border x:Name="DetailCover" Width="64" Height="86" CornerRadius="10">
+                <TextBlock x:Name="DetailInitials" Foreground="White" FontWeight="Bold" FontSize="20"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Border>
+              <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center" Spacing="4">
+                <TextBlock x:Name="DetailTitle" FontWeight="SemiBold" TextWrapping="Wrap" FontSize="14" />
+                <TextBlock x:Name="DetailAuthor" Classes="muted small" TextWrapping="Wrap" />
+                <TextBlock x:Name="DetailScore" Classes="tiny" />
+              </StackPanel>
+            </Grid>
+
+            <Separator Background="{StaticResource CardLine}" />
+
+            <StackPanel Spacing="8">
+              <TextBlock Classes="caption" Text="ВАША ОЦЕНКА" />
+              <WrapPanel x:Name="RatingPanel" />
+              <TextBlock x:Name="DetailNote" Classes="tiny" TextWrapping="Wrap" />
+            </StackPanel>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <!-- ================= НИЖНЯЯ СТРОКА ================= -->
+    <Border Grid.Row="2" Background="{StaticResource CardBg}" BorderBrush="{StaticResource CardLine}"
+            BorderThickness="0,1,0,0" Padding="20,8">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock x:Name="TxtStatus" Classes="muted small" VerticalAlignment="Center" Text="Готово к работе" />
+        <TextBlock Grid.Column="1" x:Name="TxtDbInfo" Classes="tiny" VerticalAlignment="Center" />
+      </Grid>
+    </Border>
+  </Grid>
+</Window>
